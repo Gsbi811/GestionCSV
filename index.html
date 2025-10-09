@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Fusionar CSVs de Vehículos</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 30px;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: left;
+    }
+
+    input[type="file"] {
+      margin: 10px 0;
+      display: block;
+      width: 100%;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Derechos de autor */
+    .footer {
+      position: fixed;
+      bottom: 10px;
+      right: 15px;
+      font-size: 14px;
+      color: #666;
+      font-style: italic;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Fusionar archivos CSV</h1>
+
+    <label>Archivo principal:</label>
+    <input type="file" id="vehiculoCSV" accept=".csv">
+
+    <label>Archivo de datos:</label>
+    <input type="file" id="b1CSV" accept=".csv">
+
+    <button onclick="fusionarCSV()">Fusionar archivos</button>
+  </div>
+
+  <!-- Derechos de autor -->
+  <div class="footer">© Gabriel y Jorge</div>
+
+  <script>
+    function fusionarCSV() {
+      const vehiculoFile = document.getElementById('vehiculoCSV').files[0];
+      const b1File = document.getElementById('b1CSV').files[0];
+
+      if (!vehiculoFile || !b1File) {
+        alert("Por favor, selecciona ambos archivos CSV.");
+        return;
+      }
+
+      Papa.parse(vehiculoFile, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(resultsVehiculo) {
+          Papa.parse(b1File, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(resultsB1) {
+              const vehiculos = resultsVehiculo.data;
+              const b1 = resultsB1.data;
+
+              const b1Map = {};
+              b1.forEach(row => {
+                b1Map[row.codvehiculo] = {
+                  bastidor: row.bastidor,
+                  matricula: row.matricula
+                };
+              });
+
+              vehiculos.forEach(row => {
+                const cod = row.codvehiculo;
+                if (b1Map[cod]) {
+                  if (!row.bastidor || row.bastidor.trim() === "") {
+                    row.bastidor = b1Map[cod].bastidor;
+                  }
+                  if (!row.matricula || row.matricula.trim() === "") {
+                    row.matricula = b1Map[cod].matricula;
+                  }
+                }
+              });
+
+              const resultadoCSV = Papa.unparse(vehiculos);
+              const blob = new Blob([resultadoCSV], { type: 'text/csv;charset=utf-8;' });
+              const url = URL.createObjectURL(blob);
+
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'vehiculos_fusionado.csv';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            }
+          });
+        }
+      });
+    }
+  </script>
+</body>
+</html>
