@@ -34,6 +34,15 @@ if ($_FILES['vehiculo']['error'] === UPLOAD_ERR_OK && $_FILES['b1']['error'] ===
         $b1Map[$fila['codvehiculo']] = $fila;
     }
 
+    // Asegurar que los campos estén en la cabecera
+    foreach (['bastidor', 'matricula', 'fechasalida'] as $campo) {
+        if (!in_array($campo, $cabeceraVehiculo)) {
+            $cabeceraVehiculo[] = $campo;
+        }
+    }
+
+    $limite = DateTime::createFromFormat('d-m-Y', '01-01-2017');
+
     foreach ($vehiculos as &$vehiculo) {
         $cod = $vehiculo['codvehiculo'];
         if (isset($b1Map[$cod])) {
@@ -42,6 +51,19 @@ if ($_FILES['vehiculo']['error'] === UPLOAD_ERR_OK && $_FILES['b1']['error'] ===
             }
             if (empty($vehiculo['matricula'])) {
                 $vehiculo['matricula'] = $b1Map[$cod]['matricula'];
+            }
+
+            // fechasalida solo si es posterior a 01/01/2017 (formato dd/mm/yyyy)
+            if (!empty($b1Map[$cod]['fechasalida'])) {
+                $rawFecha = trim($b1Map[$cod]['fechasalida']);
+                $rawFecha = str_replace('-', '/', $rawFecha); // por si vienen con guiones
+                $fechaSalida = DateTime::createFromFormat('d/m/Y', $rawFecha);
+
+                if ($fechaSalida && $fechaSalida > $limite) {
+                    $vehiculo['fechasalida'] = $fechaSalida->format('d/m/Y');
+                } else {
+                    $vehiculo['fechasalida'] = '';
+                }
             }
         }
     }
@@ -55,3 +77,4 @@ if ($_FILES['vehiculo']['error'] === UPLOAD_ERR_OK && $_FILES['b1']['error'] ===
     http_response_code(400);
     echo "Error al subir los archivos.";
 }
+?>
