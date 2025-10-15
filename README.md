@@ -1,7 +1,7 @@
 
 # 🛠️ Fusionador de Archivos CSV para Vehículos
 
-Este proyecto te permite combinar fácilmente dos archivos CSV con información de vehículos, completando los datos faltantes como matrícula o número de bastidor. Puedes hacerlo directamente en tu navegador o desde el servidor, según tus necesidades.
+Este proyecto te permite combinar fácilmente dos archivos CSV con información de vehículos, completando los datos faltantes como matrícula, número de bastidor fecha de salida. Puedes hacerlo directamente en tu navegador o desde el servidor, según tus necesidades.
 
 ---
 
